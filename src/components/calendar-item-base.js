@@ -36,6 +36,13 @@ export class CalendarItemBase extends HTMLElement {
         throw new Error("render() must be implemented by subclass")
     }
 
+    renderMetadataHtml() {
+        const metadata = this.getMetadataProperties()
+        return metadata.length > 0
+            ? metadata.map(([key, value]) => `<span class="metadata-item">${key}: ${value}</span>`).join("")
+            : ""
+    }
+
     updateVisibility() {
         const shouldShow = this.evaluateFilters()
 
