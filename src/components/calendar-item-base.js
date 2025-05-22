@@ -13,42 +13,6 @@ export class CalendarItemBase extends HTMLElement {
         this.data = null
         this.filterState = {}
         this.isVisible = true
-
-        this.createTemplate()
-        this.setupShadowDOM()
-    }
-
-    createTemplate() {
-        this.template = `
-            <style>
-                :host {
-                    display: block;
-                }
-
-                :host([hidden]) {
-                    display: none;
-                }
-
-                #date {}
-
-                #description {}
-
-                #metadata {}
-            </style>
-            <div id="date"></div>
-            <div id="description"></div>
-            <div id="metadata"></div>
-        `
-    }
-
-    setupShadowDOM() {
-        this.shadowRoot.innerHTML = this.template
-
-        this.elems = {
-            date: this.shadowRoot.querySelector("#date"),
-            description: this.shadowRoot.querySelector("#description"),
-            metadata: this.shadowRoot.querySelector("#metadata")
-        }
     }
 
     setData(itemObject) {
@@ -61,40 +25,15 @@ export class CalendarItemBase extends HTMLElement {
         this.updateVisibility()
     }
 
-    render() {
-        if (!this.data) return
-
-        this.renderDate()
-        this.renderDescription()
-        this.renderMetadata()
-        this.updateVisibility()
-    }
-
-    renderDate() {
-        // To be implemented by subclasses
-        throw new Error("renderDate must be implemented by subclass")
-    }
-
-    renderDescription() {
-        this.elems.description.textContent = this.data.description ?? ""
-    }
-
-    renderMetadata() {
-        const metadata = this.getMetadataProperties()
-        if (metadata.length > 0) {
-            this.elems.metadata.innerHTML = metadata
-                .map(([key, value]) => `<span class="metadata-item">${key}: ${value}</span>`)
-                .join("")
-        } else {
-            this.elems.metadata.innerHTML = ""
-        }
-    }
-
     getMetadataProperties() {
         if (!this.data) return []
 
         return Object.entries(this.data)
             .filter(([key, value]) => !CalendarItemBase.EXCLUDED_KEYS.has(key) && value != null)
+    }
+
+    render() {
+        throw new Error("render() must be implemented by subclass")
     }
 
     updateVisibility() {
@@ -128,13 +67,10 @@ export class CalendarItemBase extends HTMLElement {
     }
 
     formatDateRange(startMonth, startDay, endMonth, endDay, locale) {
-        const startDate = new Date(2024, startMonth - 1, startDay)
-        const endDate = new Date(2024, endMonth - 1, endDay)
-
         // Same month - show "January 5-12"
         if (startMonth === endMonth) {
-            const monthName = startDate.toLocaleDateString(locale, { month: "long" })
-            return `${monthName} ${startDay}-${endDay}`
+            const formattedDate = this.formatDate(startMonth, startDay, locale)
+            return `${formattedDate}-${endDay}`
         }
 
         // Different months - show "January 28 - February 3"
