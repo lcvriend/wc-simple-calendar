@@ -56,7 +56,13 @@ export class CalendarItemBase extends HTMLElement {
         })
     }
 
-    formatDate(month, day, locale) {
+    formatDateTimeAttribute(month, day) {
+        const monthStr = String(month).padStart(2, '0')
+        const dayStr = String(day).padStart(2, '0')
+        return `${monthStr}-${dayStr}`
+    }
+
+    formatDateLabel(month, day, locale) {
         // Create a date object for the current year (arbitrary, we just need month/day)
         const date = new Date(2024, month - 1, day)
 
@@ -66,7 +72,7 @@ export class CalendarItemBase extends HTMLElement {
         })
     }
 
-    formatDateRange(startMonth, startDay, endMonth, endDay, locale) {
+    formatDateRangeLabel(startMonth, startDay, endMonth, endDay, locale) {
         // Same month - show "January 5-12"
         if (startMonth === endMonth) {
             const formattedDate = this.formatDate(startMonth, startDay, locale)
