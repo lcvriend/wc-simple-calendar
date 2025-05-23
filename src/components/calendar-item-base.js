@@ -37,10 +37,9 @@ export class CalendarItemBase extends HTMLElement {
     }
 
     renderMetadataHtml() {
-        const metadata = this.getMetadataProperties()
-        return metadata.length > 0
-            ? metadata.map(([key, value]) => `<span class="metadata-item">${key}: ${value}</span>`).join("")
-            : ""
+        return this.getMetadataProperties()
+            .map(([, value]) => `<span class="metadata-item">${value}</span>`)
+            .join("")
     }
 
     updateVisibility() {
