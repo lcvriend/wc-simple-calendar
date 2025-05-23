@@ -1,11 +1,33 @@
-import { CalendarItemBase } from './calendar-item-base.js'
+export class CalendarEvent extends HTMLElement {
+    static EXCLUDED_KEYS = new Set([
+        "start_month",
+        "start_day",
+        "end_month",
+        "end_day",
+        "description",
+    ])
 
-export class CalendarEvent extends CalendarItemBase {
+    constructor(data = null) {
+        super()
+        this.attachShadow({ mode: "open" })
+        if (data) this.setData(data)
+    }
+
+    setData(itemObject) {
+        this.data = itemObject
+        this.render()
+    }
+
+    getMetadataProperties() {
+        if (!this.data) return []
+
+        return Object.entries(this.data)
+            .filter(([key, value]) => !CalendarEvent.EXCLUDED_KEYS.has(key) && value != null)
+    }
+
     render() {
         if (!this.data) return
         
-        const datetime = this.formatDateTimeAttribute(this.data.start_month, this.data.start_day)
-        const dateLabel = this.formatDateLabel(this.data.start_month, this.data.start_day)
         const description = this.data.description ?? ""
         const metadata = this.renderMetadataHtml()
         
@@ -13,7 +35,6 @@ export class CalendarEvent extends CalendarItemBase {
             <style>
                 :host { display: block; }
                 :host([hidden]) { display: none; }
-                time { }
                 #description { }
                 #metadata { }
                 .metadata-item { }
@@ -21,10 +42,15 @@ export class CalendarEvent extends CalendarItemBase {
                     content: " • ";
                 }
             </style>
-            <time datetime="${datetime}">${dateLabel}</time>
             <div id="description">${description}</div>
             <div id="metadata">${metadata}</div>
         `
+    }
+
+    renderMetadataHtml() {
+        return this.getMetadataProperties()
+            .map(([, value]) => `<span class="metadata-item">${value}</span>`)
+            .join("")
     }
 }
 
