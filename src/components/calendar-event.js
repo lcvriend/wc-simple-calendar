@@ -27,17 +27,17 @@ export class CalendarEvent extends HTMLElement {
 
     render() {
         if (!this.data) return
-        
+
         const description = this.data.description ?? ""
         const metadata = this.renderMetadataHtml()
-        
+
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; }
                 :host([hidden]) { display: none; }
                 #description { }
                 #metadata { }
-                .metadata-item { }
+                .metadata-item { font-family: monospace; }
                 .metadata-item:not(:last-child)::after {
                     content: " • ";
                 }
