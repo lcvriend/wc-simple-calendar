@@ -1,5 +1,5 @@
-// calendar-container.js
 import './calendar-event-group.js'
+import { CalendarEvent } from './calendar-event.js'
 
 export class CalendarEventsContainer extends HTMLElement {
    constructor(calendarArray = null, locale = null) {
@@ -62,11 +62,53 @@ export class CalendarEventsContainer extends HTMLElement {
            grouped.get(dateKey).events.push(event)
        })
 
-       return Array.from(grouped.values()).sort((a, b) => {
-           if (a.month !== b.month) return a.month - b.month
-           return a.day - b.day
-       })
+        // Sort events within each date group by metadata categories
+        grouped.forEach(dateGroup => {
+            dateGroup.events.sort((a, b) => {
+                const aCategories = this.getMetadataCategories(a)
+                const bCategories = this.getMetadataCategories(b)
+
+                for (let i = 0; i < Math.max(aCategories.length, bCategories.length); i++) {
+                    const aValue = aCategories[i] || ""
+                    const bValue = bCategories[i] || ""
+
+                    if (aValue !== bValue) {
+                        return aValue.localeCompare(bValue)
+                    }
+                }
+                return 0
+            })
+        })
+
+        return Array.from(grouped.values()).sort((a, b) => {
+            const aDays = this.getDaysFromToday(a.month, a.day)
+            const bDays = this.getDaysFromToday(b.month, b.day)
+            return aDays - bDays
+        })
    }
+
+    getDaysFromToday(month, day) {
+        const today = new Date()
+        const currentYear = today.getFullYear()
+        const currentMonth = today.getMonth() + 1
+        const currentDay = today.getDate()
+
+        const targetDate = new Date(currentYear, month - 1, day)
+        const todayDate = new Date(currentYear, currentMonth - 1, currentDay)
+
+        if (targetDate >= todayDate) {
+            return Math.floor((targetDate - todayDate) / (1000 * 60 * 60 * 24))
+        } else {
+            const nextYearDate = new Date(currentYear + 1, month - 1, day)
+            return Math.floor((nextYearDate - todayDate) / (1000 * 60 * 60 * 24))
+        }
+    }
+
+    getMetadataCategories(event) {
+        return Object.entries(event)
+            .filter(([key, value]) => !CalendarEvent.EXCLUDED_KEYS.has(key) && value != null)
+            .map(([key, value]) => value)
+    }
 
    shouldShowMonthHeader(current, array, index) {
        return index === 0 || current.month !== array[index - 1].month
