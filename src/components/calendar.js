@@ -2,18 +2,31 @@ import './metadata-filters.js'
 import { CalendarEventsContainer } from './calendar-events-container.js'
 
 export class Calendar extends HTMLElement {
+    static get observedAttributes() {
+        return ['locale']
+    }
+
     constructor(data = null, locale = null) {
         super()
         this.attachShadow({ mode: "open" })
         this.rawData = null
-        this.locale = locale
+        this.locale = locale ?? this.getAttribute('locale')
         this.events = []
         this.periods = []
         this.activeFilters = {}
         if (data) this.setData(data)
     }
 
-    setData(data, locale = null) {
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'locale' && oldValue !== newValue) {
+            this.locale = newValue
+            if (this.rawData) {
+                this.render()
+            }
+        }
+    }
+
+    setData(data) {
         this.rawData = data
         this.processData()
         this.render()
