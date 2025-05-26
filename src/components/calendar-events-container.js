@@ -91,18 +91,24 @@ export class CalendarEventsContainer extends HTMLElement {
     getDaysFromToday(month, day) {
         const today = new Date()
         const currentYear = today.getFullYear()
-        const currentMonth = today.getMonth() + 1
-        const currentDay = today.getDate()
-
         const targetDate = new Date(currentYear, month - 1, day)
-        const todayDate = new Date(currentYear, currentMonth - 1, currentDay)
+        const todayDate = new Date(currentYear, today.getMonth(), today.getDate())
 
-        if (targetDate >= todayDate) {
-            return Math.floor((targetDate - todayDate) / (1000 * 60 * 60 * 24))
-        } else {
+        const diffTime = targetDate - todayDate
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+        // Show past events within our threshold as negative days
+        if (diffDays < 0 && Math.abs(diffDays) <= this.pastDays) {
+            return diffDays
+        }
+
+        // Past events beyond threshold are assumed to be next year
+        if (diffDays < -this.pastDays) {
             const nextYearDate = new Date(currentYear + 1, month - 1, day)
             return Math.floor((nextYearDate - todayDate) / (1000 * 60 * 60 * 24))
         }
+
+        return diffDays
     }
 
     getMetadataCategories(event) {
@@ -148,11 +154,23 @@ export class CalendarEventsContainer extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
             <style>
-                :host { display: block; }
+                :host {
+                    display: block;
+                    height: 400px;
+                    overflow-y: auto;
+                }
+                #scroll-to-today {
+                    position: sticky;
+                    top: 0;
+                    float: right;
+                    cursor: pointer;
+                    z-index: 1;
+                }
                 calendar-date-group {
                     margin-bottom: 0.5rem;
                 }
             </style>
+            <button id="scroll-to-today">Today</button>
         `
 
         this.processedData.forEach(item => {
@@ -175,6 +193,44 @@ export class CalendarEventsContainer extends HTMLElement {
                     this.shadowRoot.appendChild(dateGroupElelement)
                     break
             }
+        })
+
+        this.shadowRoot.getElementById('scroll-to-today').addEventListener('click', () => {
+            this.scrollToToday()
+        })
+
+        setTimeout(() => this.scrollToToday(), 0)
+    }
+
+    scrollToToday() {
+        const today = new Date()
+        const todayMonth = today.getMonth() + 1
+        const todayDay = today.getDate()
+
+        const dateGroups = this.shadowRoot.querySelectorAll('calendar-date-group')
+
+        // First try to find today
+        let targetGroup = Array.from(dateGroups).find(group =>
+            group.month === todayMonth && group.day === todayDay
+        )
+
+        // If no today, find the closest future date
+        if (!targetGroup) {
+            targetGroup = Array.from(dateGroups).find(group => {
+                const groupDays = this.getDaysFromToday(group.month, group.day)
+                return groupDays > 0 // First positive (future) date
+            })
+        }
+
+        // Fallback to first date if no future dates
+        if (!targetGroup && dateGroups.length > 0) {
+            targetGroup = dateGroups[0]
+        }
+
+        targetGroup?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
         })
     }
 }

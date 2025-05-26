@@ -62,8 +62,10 @@ export class MetadataFilter extends HTMLElement {
             <style>
                 :host { display: block; }
                 checkbox-group {
-                    display: block;
-                    margin-bottom: 8px;
+                    margin-bottom: 1rem;
+                }
+                checkbox-group + checkbox-group {
+                    border-top: 1px solid currentColor;
                 }
             </style>
         `

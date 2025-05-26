@@ -1,6 +1,7 @@
 export class CheckboxGroup extends HTMLElement {
     constructor(data = null) {
         super()
+        this.attachShadow({ mode: "open" })
         this.selectedItems = new Set()
         this.data = {}
         this.groupLabel = ""
@@ -9,7 +10,7 @@ export class CheckboxGroup extends HTMLElement {
     }
 
     connectedCallback() {
-        this.addEventListener("click", this.handleClick.bind(this))
+        this.shadowRoot.addEventListener("click", this.handleClick.bind(this))
         if (this.groupLabel) {
             this.loadFromStorage()
             this.render()
@@ -34,15 +35,38 @@ export class CheckboxGroup extends HTMLElement {
     }
 
     render() {
-        this.innerHTML = `
-            <span>${this.groupLabel}:</span>
+        this.shadowRoot.innerHTML = `
+            <style>
+                :host {
+                    display: grid;
+                    grid-template-columns: 12ch auto 1fr;
+                    gap: .5em;
+                    align-items: start;
+                    padding: .25em;
+                }
+                #checkboxes {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: .5em;
+                }
+                #category-name {
+                    font-variant: small-caps;
+                    font-weight: bold;
+                }
+                label {
+                    user-select: none;
+                }
+            </style>
+            <div id="category-name">${this.groupLabel}</div>
             <button type="button" class="select-all">All</button>
+            <div id="checkboxes">
             ${this.data.map(val => `
                 <label>
                     <input type="checkbox" value="${val}">
                     ${val}
                 </label>
             `).join("")}
+            </div>
         `
         this.syncCheckboxes()
     }
@@ -106,7 +130,7 @@ export class CheckboxGroup extends HTMLElement {
     }
 
     syncCheckboxes() {
-        const checkboxes = this.querySelectorAll("input[type=checkbox]")
+        const checkboxes = this.shadowRoot.querySelectorAll("input[type=checkbox]")
         checkboxes.forEach(cb => {
             cb.checked = this.selectedItems.has(cb.value)
         })
@@ -119,7 +143,7 @@ export class CheckboxGroup extends HTMLElement {
                 groupLabel: this.groupLabel
             },
             bubbles: true,
-            composed: true
+            composed: true,
         }))
     }
 }

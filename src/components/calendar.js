@@ -1,5 +1,5 @@
 import './metadata-filters.js'
-import './calendar-events-container.js'
+import { CalendarEventsContainer } from './calendar-events-container.js'
 
 export class Calendar extends HTMLElement {
     constructor(data = null, locale = null) {
@@ -10,12 +10,11 @@ export class Calendar extends HTMLElement {
         this.events = []
         this.periods = []
         this.activeFilters = {}
-        if (data) this.setData(data, locale)
+        if (data) this.setData(data)
     }
 
     setData(data, locale = null) {
         this.rawData = data
-        this.locale = locale
         this.processData()
         this.render()
     }
@@ -64,7 +63,7 @@ export class Calendar extends HTMLElement {
         const filteredEvents = this.applyFilters(this.events)
         const eventsContainer = this.shadowRoot.querySelector("calendar-events-container")
         if (eventsContainer) {
-            eventsContainer.setData(filteredEvents, this.locale)
+            eventsContainer.setData(filteredEvents)
         }
     }
 
@@ -75,9 +74,38 @@ export class Calendar extends HTMLElement {
             <style>
                 :host { display: block; }
                 #filters { margin-bottom: 20px; }
+                details {
+                    border-bottom: 1px solid;
+                }
+                summary {
+                    border-top: 4px solid;
+                    border-bottom: 1px solid;
+                    min-width: 200px;
+                    padding: 0.5em 0;
+                    position: relative;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: .5em;
+                    white-space: nowrap;
+                }
+                summary:after {
+                    content: "+";
+                    position: absolute;
+                    font-size: 1.75em;
+                    right: 0;
+                    font-weight: 200;
+                    transform-origin: center;
+                    transition: 40ms linear;
+                }
+                details[open] > summary:after {
+                    transform: rotate(45deg);
+                }
             </style>
             <div id="filters"></div>
-            <div id="events"></div>
+            <details id="events"open>
+                <summary>Events</summary>
+            </details>
         `
 
         // Create metadata filter
@@ -88,9 +116,8 @@ export class Calendar extends HTMLElement {
 
         // Create events container with initial filtered data
         const eventsContainer = this.shadowRoot.getElementById("events")
-        const calendarEventsContainer = document.createElement("calendar-events-container")
         const filteredEvents = this.applyFilters(this.events)
-        calendarEventsContainer.setData(filteredEvents, this.locale)
+        const calendarEventsContainer = new CalendarEventsContainer(filteredEvents, this.locale)
         eventsContainer.appendChild(calendarEventsContainer)
 
         // Attach event listeners
