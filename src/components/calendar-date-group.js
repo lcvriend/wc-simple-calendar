@@ -2,16 +2,16 @@ export class CalendarDateGroup extends HTMLElement {
     constructor(month = null, day = null, events = null, locale = null) {
         super()
         this.attachShadow({ mode: "open" })
+        this.locale = locale ?? undefined
         if (month !== null && day !== null && events !== null) {
-            this.setData(month, day, events, locale)
+            this.setData(month, day, events)
         }
     }
 
-    setData(month, day, events, locale) {
+    setData(month, day, events) {
         this.month = month
         this.day = day
         this.events = events
-        this.locale = locale
         this.render()
     }
 
@@ -23,7 +23,7 @@ export class CalendarDateGroup extends HTMLElement {
 
     formatDateLabel(month, day, locale) {
         const date = new Date(2024, month - 1, day)
-        return date.toLocaleDateString(locale ?? undefined, {
+        return date.toLocaleDateString(locale, {
             month: "short",
             day: "numeric"
         })
@@ -37,8 +37,20 @@ export class CalendarDateGroup extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
             <style>
-                :host { display: block; }
+                * {
+                    padding: 0;
+                    margin: 0;
+                    box-sizing: border-box;
+                }
+                :host {
+                    display: block;
+                    padding: .5em;
+                }
                 time { font-weight: bold; }
+                #events {
+                    display: grid;
+                    gap: .5em;
+                }
             </style>
             <time datetime="${datetime}">${dateLabel}</time>
             <div id="events"></div>

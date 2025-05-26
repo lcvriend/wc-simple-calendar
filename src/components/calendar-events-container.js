@@ -1,18 +1,19 @@
-import './calendar-event-group.js'
+import './calendar-date-group.js'
 import { CalendarEvent } from './calendar-event.js'
 
 export class CalendarEventsContainer extends HTMLElement {
-   constructor(calendarArray = null, locale = null) {
+   constructor(calendarArray = null, locale = null, pastDays = 30) {
        super()
        this.attachShadow({ mode: "open" })
+       this.locale = locale ?? undefined
+       this.pastDays = pastDays
        if (calendarArray) {
-           this.setData(calendarArray, locale)
+           this.setData(calendarArray)
        }
    }
 
-   setData(calendarArray, locale = null) {
+   setData(calendarArray) {
        this.data = calendarArray
-       this.locale = locale
        this.processedData = this.processData(calendarArray)
        this.render()
    }
@@ -139,7 +140,7 @@ export class CalendarEventsContainer extends HTMLElement {
 
    formatMonthHeader(month, locale) {
        const date = new Date(2024, month - 1, 1)
-       return date.toLocaleDateString(locale ?? undefined, { month: "long" })
+       return date.toLocaleDateString(locale, { month: "long" })
    }
 
     render() {
@@ -148,6 +149,9 @@ export class CalendarEventsContainer extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; }
+                calendar-date-group {
+                    margin-bottom: 0.5rem;
+                }
             </style>
         `
 
