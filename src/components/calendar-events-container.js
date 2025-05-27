@@ -231,11 +231,15 @@ export class CalendarEventsContainer extends HTMLElement {
             targetGroup = dateGroups[0]
         }
 
-        targetGroup?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-            inline: 'nearest'
-        })
+        if (targetGroup) {
+            // Get positions relative to the viewport
+            const containerRect = this.getBoundingClientRect()
+            const targetRect = targetGroup.getBoundingClientRect()
+
+            // Calculate target position relative to container
+            const relativeTop = targetRect.top - containerRect.top + this.scrollTop
+            this.scrollTop = relativeTop
+        }
     }
 }
 

@@ -15,8 +15,8 @@ export class MetadataFilter extends HTMLElement {
     setData(data) {
         this.data = data
         this.metadata = this.extractMetadata(data)
-        this.render()
         this.attachEventListeners()
+        this.render()
     }
 
     extractMetadata(data) {
