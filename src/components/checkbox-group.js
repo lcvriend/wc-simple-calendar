@@ -123,6 +123,11 @@ export class CheckboxGroup extends HTMLElement {
                 const storedItems = JSON.parse(stored)
                 // Only keep items that still exist in current data
                 this.selectedItems = new Set(storedItems.filter(item => this.data.includes(item)))
+
+                // Emit change event if we loaded any items
+                if (this.selectedItems.size > 0) {
+                    this.emitChange()
+                }
             } catch (e) {
                 console.warn("Failed to load from storage:", e)
             }

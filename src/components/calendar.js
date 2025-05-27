@@ -17,6 +17,10 @@ export class Calendar extends HTMLElement {
         if (data) this.setData(data)
     }
 
+    connectedCallback() {
+        this.shadowRoot.addEventListener("filter-change", this.handleFilterChange.bind(this))
+    }
+
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'locale' && oldValue !== newValue) {
             this.locale = newValue
@@ -66,6 +70,7 @@ export class Calendar extends HTMLElement {
     }
 
     handleFilterChange(event) {
+        console.log("Calendar received filter change:", event.detail)
         if (event.detail.type === "metadata") {
             this.activeFilters = event.detail.selections
             this.updateEventsContainer()
@@ -132,9 +137,6 @@ export class Calendar extends HTMLElement {
         const filteredEvents = this.applyFilters(this.events)
         const calendarEventsContainer = new CalendarEventsContainer(filteredEvents, this.locale)
         eventsContainer.appendChild(calendarEventsContainer)
-
-        // Attach event listeners
-        this.shadowRoot.addEventListener("filter-change", this.handleFilterChange.bind(this))
     }
 }
 
