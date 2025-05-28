@@ -1,4 +1,4 @@
-import { CalendarEvent } from './calendar-event.js'
+import { CalendarEvent } from '../events/calendar-event.js'
 import { CheckboxGroup } from './checkbox-group.js'
 
 

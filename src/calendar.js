@@ -1,5 +1,5 @@
-import './metadata-filters.js'
-import { CalendarEventsContainer } from './calendar-events-container.js'
+import './controls/metadata-filters.js'
+import { CalendarEventsContainer } from './events/calendar-events-container.js'
 
 export class Calendar extends HTMLElement {
     static get observedAttributes() {
