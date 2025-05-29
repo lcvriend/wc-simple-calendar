@@ -1,3 +1,5 @@
+import { CalendarEvent } from "./calendar-event.js"
+
 export class CalendarDateGroup extends HTMLElement {
     constructor(month = null, day = null, events = null, locale = null) {
         super()
@@ -56,12 +58,10 @@ export class CalendarDateGroup extends HTMLElement {
             <div id="events"></div>
         `
 
-        // Add event elements to the events container
         const eventsContainer = this.shadowRoot.getElementById("events")
         this.events.forEach(eventData => {
-            const eventEl = document.createElement("calendar-event")
-            eventEl.setData(eventData)
-            eventsContainer.appendChild(eventEl)
+            const event = new CalendarEvent(eventData)
+            eventsContainer.appendChild(event)
         })
     }
 }
