@@ -1,4 +1,4 @@
-import { CalendarDateGroup } from './calendar-date-group.js'
+import { CalendarEventGroup } from './calendar-event-group.js'
 import { CalendarEvent } from './calendar-event.js'
 
 export class CalendarEventsContainer extends HTMLElement {
@@ -188,7 +188,7 @@ export class CalendarEventsContainer extends HTMLElement {
                     break
 
                 case 'date-group':
-                    const dateGroupElelement = new CalendarDateGroup(
+                    const dateGroupElelement = new CalendarEventGroup(
                         item.month,
                         item.day,
                         item.events,

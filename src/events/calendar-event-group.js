@@ -1,6 +1,6 @@
 import { CalendarEvent } from "./calendar-event.js"
 
-export class CalendarDateGroup extends HTMLElement {
+export class CalendarEventGroup extends HTMLElement {
     constructor(month = null, day = null, events = null, locale = null) {
         super()
         this.attachShadow({ mode: "open" })
@@ -66,4 +66,4 @@ export class CalendarDateGroup extends HTMLElement {
     }
 }
 
-customElements.define("calendar-date-group", CalendarDateGroup)
+customElements.define("calendar-date-group", CalendarEventGroup)
