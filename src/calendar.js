@@ -1,19 +1,29 @@
-import './controls/metadata-filters.js'
-import { CalendarEventsContainer } from './events/calendar-events-container.js'
+import { MetadataFilter } from "./controls/metadata-filters.js"
+import { PeriodFilter } from './controls/period-filter.js'
+import { CalendarEventsContainer } from "./events/calendar-events-container.js"
+import { CalendarPeriodsContainer } from "./periods/calendar-periods-container.js"
 
 export class Calendar extends HTMLElement {
     static get observedAttributes() {
-        return ['locale']
+        return ["locale"]
     }
 
     constructor(data = null, locale = null) {
         super()
         this.attachShadow({ mode: "open" })
         this.rawData = null
-        this.locale = locale ?? this.getAttribute('locale')
+        this.locale = locale ?? this.getAttribute("locale")
         this.events = []
         this.periods = []
-        this.activeFilters = {}
+
+        this.metadataFilters = {}
+        this.periodsFilter = "active" // "all" | "active"
+
+        this.eventsContainer = new CalendarEventsContainer(null, this.locale)
+        this.periodsContainer = new CalendarPeriodsContainer(null, this.locale)
+        this.metadataFilter = new MetadataFilter(null)
+        this.periodFilter = new PeriodFilter()
+
         if (data) this.setData(data)
     }
 
@@ -22,7 +32,7 @@ export class Calendar extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'locale' && oldValue !== newValue) {
+        if (name === "locale" && oldValue !== newValue) {
             this.locale = newValue
             if (this.rawData) {
                 this.render()
@@ -41,7 +51,7 @@ export class Calendar extends HTMLElement {
 
         const { events, periods } = this.splitEventsAndPeriods(this.rawData)
         this.events = events
-        this.periods = periods // computed but not used yet
+        this.periods = periods
     }
 
     splitEventsAndPeriods(data) {
@@ -59,45 +69,76 @@ export class Calendar extends HTMLElement {
         return { events, periods }
     }
 
-    applyFilters(items) {
-        if (Object.keys(this.activeFilters).length === 0) return items
+    handleFilterChange(event) {
+        if (event.detail.type === "metadata") {
+            this.metadataFilters = event.detail.selections
+        } else if (event.detail.type === "periods") {
+            this.periodsFilter = event.detail.value
+        }
+        this.updateContainers()
+    }
+
+    applyFilters(items, itemType) {
+        let filtered = this.applyMetadataFilter(items)
+
+        if (itemType === "periods") {
+            filtered = this.applyPeriodsFilter(filtered)
+        }
+
+        return filtered
+    }
+
+    applyMetadataFilter(items) {
+        if (Object.keys(this.metadataFilters).length === 0) return items
 
         return items.filter(item => {
-            return Object.entries(this.activeFilters).every(([category, selectedValues]) => {
+            return Object.entries(this.metadataFilters).every(([category, selectedValues]) => {
                 return selectedValues.length === 0 || selectedValues.includes(item[category])
             })
         })
     }
 
-    handleFilterChange(event) {
-        console.log("Calendar received filter change:", event.detail)
-        if (event.detail.type === "metadata") {
-            this.activeFilters = event.detail.selections
-            this.updateEventsContainer()
-        }
+    applyPeriodsFilter(items) {
+        if (this.periodsFilter === "all") return items
+
+        return items.filter(period => this.isPeriodActive(period))
     }
 
-    updateEventsContainer() {
-        const filteredEvents = this.applyFilters(this.events)
-        const eventsContainer = this.shadowRoot.querySelector("calendar-events-container")
-        if (eventsContainer) {
-            eventsContainer.setData(filteredEvents)
+    isPeriodActive(period) {
+        const today = new Date()
+        const currentYear = today.getFullYear()
+
+        let startDate = new Date(currentYear, period.start_month - 1, period.start_day)
+        let endDate = new Date(currentYear, period.end_month - 1, period.end_day)
+
+        // Handle periods that cross year boundary
+        if (endDate < startDate) {
+            endDate = new Date(currentYear + 1, period.end_month - 1, period.end_day)
         }
+
+        const result = today >= startDate && today <= endDate
+        return result
+    }
+
+    updateContainers() {
+        const filteredEvents = this.applyFilters(this.events)
+        const filteredPeriods = this.applyFilters(this.periods, "periods")
+
+        this.eventsContainer.setData(filteredEvents)
+        this.periodsContainer.setData(filteredPeriods)
     }
 
     render() {
         if (!this.rawData) return
 
+        this.metadataFilter.setData(this.rawData)
+        this.updateContainers()
+
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; }
-                #filters { margin-bottom: 20px; }
-                details {
-                    border-bottom: 1px solid;
-                }
                 summary {
                     border-top: 4px solid;
-                    border-bottom: 1px solid;
                     min-width: 200px;
                     padding: 0.5em 0;
                     position: relative;
@@ -116,27 +157,30 @@ export class Calendar extends HTMLElement {
                     transform-origin: center;
                     transition: 40ms linear;
                 }
-                details[open] > summary:after {
-                    transform: rotate(45deg);
+                details[open] {
+                    > summary {
+                        border-bottom: 1px solid;
+                    }
+                    > summary:after {
+                        transform: rotate(45deg);
+                    }
                 }
             </style>
-            <div id="filters"></div>
-            <details id="events"open>
+            <details id="filters" open>
+                <summary>Filters</summary>
+            </details>
+            <details id="events" open>
                 <summary>Events</summary>
+            </details>
+            <details id="periods" open>
+                <summary>Periods</summary>
             </details>
         `
 
-        // Create metadata filter
-        const filtersContainer = this.shadowRoot.getElementById("filters")
-        const metadataFilter = document.createElement("metadata-filter")
-        metadataFilter.setData(this.rawData)
-        filtersContainer.appendChild(metadataFilter)
-
-        // Create events container with initial filtered data
-        const eventsContainer = this.shadowRoot.getElementById("events")
-        const filteredEvents = this.applyFilters(this.events)
-        const calendarEventsContainer = new CalendarEventsContainer(filteredEvents, this.locale)
-        eventsContainer.appendChild(calendarEventsContainer)
+        this.shadowRoot.getElementById("events").appendChild(this.eventsContainer)
+        this.shadowRoot.getElementById("periods").appendChild(this.periodsContainer)
+        this.shadowRoot.getElementById("filters").appendChild(this.metadataFilter)
+        this.shadowRoot.getElementById("filters").appendChild(this.periodFilter)
     }
 }
 
