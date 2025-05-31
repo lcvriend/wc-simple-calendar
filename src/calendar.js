@@ -78,14 +78,12 @@ export class Calendar extends HTMLElement {
         this.updateContainers()
     }
 
-    applyFilters(items, itemType) {
-        let filtered = this.applyMetadataFilter(items)
+    filterEvents(events) {
+        return this.applyMetadataFilter(events)
+    }
 
-        if (itemType === "periods") {
-            filtered = this.applyPeriodsFilter(filtered)
-        }
-
-        return filtered
+    filterPeriods(periods) {
+        return this.applyPeriodsFilter(this.applyMetadataFilter(periods))
     }
 
     applyMetadataFilter(items) {
@@ -121,11 +119,8 @@ export class Calendar extends HTMLElement {
     }
 
     updateContainers() {
-        const filteredEvents = this.applyFilters(this.events)
-        const filteredPeriods = this.applyFilters(this.periods, "periods")
-
-        this.eventsContainer.setData(filteredEvents)
-        this.periodsContainer.setData(filteredPeriods)
+        this.eventsContainer.setData(this.filterEvents(this.events))
+        this.periodsContainer.setData(this.filterPeriods(this.periods))
     }
 
     render() {
