@@ -29,6 +29,7 @@ export class Calendar extends HTMLElement {
 
     connectedCallback() {
         this.shadowRoot.addEventListener("filter-change", this.handleFilterChange.bind(this))
+        this.generateStorageKey()
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -123,6 +124,41 @@ export class Calendar extends HTMLElement {
         this.periodsContainer.setData(this.filterPeriods(this.periods))
     }
 
+    generateStorageKey() {
+        const sanitizedPath = location.pathname.replace(/[\/\s]+/g, "-").replace(/^-+|-+$/g, "")
+        this.storageKey = `calendar-details-${sanitizedPath}`
+    }
+
+    saveDetailsState(detailsId, isOpen) {
+        if (!this.storageKey) return
+
+        const states = this.loadDetailsStates()
+        states[detailsId] = isOpen
+        localStorage.setItem(this.storageKey, JSON.stringify(states))
+    }
+
+    loadDetailsStates() {
+        if (!this.storageKey) return {}
+
+        try {
+            return JSON.parse(localStorage.getItem(this.storageKey) || "{}")
+        } catch (e) {
+            return {}
+        }
+    }
+
+    setupDetailsListeners() {
+        const savedStates = this.loadDetailsStates()
+        this.shadowRoot.querySelectorAll("details").forEach(details => {
+            if (details.id in savedStates) {
+                details.open = savedStates[details.id]
+            }
+            details.addEventListener("toggle", () => {
+                this.saveDetailsState(details.id, details.open)
+            })
+        })
+    }
+
     render() {
         if (!this.rawData) return
 
@@ -176,6 +212,8 @@ export class Calendar extends HTMLElement {
         this.shadowRoot.getElementById("periods").appendChild(this.periodsContainer)
         this.shadowRoot.getElementById("filters").appendChild(this.metadataFilter)
         this.shadowRoot.getElementById("filters").appendChild(this.periodFilter)
+
+        this.setupDetailsListeners()
     }
 }
 
