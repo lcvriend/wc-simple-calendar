@@ -4,25 +4,34 @@ import { CalendarEventsContainer } from "./events/calendar-events-container.js"
 import { CalendarPeriodsContainer } from "./periods/calendar-periods-container.js"
 
 export class Calendar extends HTMLElement {
+    static defaultConfig = {
+        locale: undefined,
+        labels: {
+            filters: "Filters",
+            filtersAll: "All",
+            periods: "Periods",
+            periodsAll: "All",
+            periodsActive: "Active",
+            events: "Events",
+            eventsToday: "Today"
+        }
+    }
+
     static get observedAttributes() {
         return ["locale"]
     }
 
-    constructor(data = null, locale = null) {
+    constructor(data = null, config = {}) {
         super()
         this.attachShadow({ mode: "open" })
+        this.config = this.mergeConfig(config)
+
         this.rawData = null
-        this.locale = locale ?? this.getAttribute("locale")
         this.events = []
         this.periods = []
 
         this.metadataFilters = {}
         this.periodsFilter = "active" // "all" | "active"
-
-        this.eventsContainer = new CalendarEventsContainer(null, this.locale)
-        this.periodsContainer = new CalendarPeriodsContainer(null, this.locale)
-        this.metadataFilter = new MetadataFilter(null)
-        this.periodFilter = new PeriodFilter()
 
         if (data) this.setData(data)
     }
@@ -34,10 +43,26 @@ export class Calendar extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "locale" && oldValue !== newValue) {
-            this.locale = newValue
+            this.config.locale = newValue  // Update config
             if (this.rawData) {
                 this.render()
             }
+        }
+    }
+
+    setConfig(newConfig) {
+        this.config = this.mergeConfig(newConfig)
+        this.render()
+    }
+
+    mergeConfig(userConfig) {
+        const locale = this.getAttribute("locale") ??
+            userConfig.locale ??
+            Calendar.defaultConfig.locale
+
+        return {
+            locale,
+            labels: { ...Calendar.defaultConfig.labels, ...userConfig.labels },
         }
     }
 
@@ -68,6 +93,11 @@ export class Calendar extends HTMLElement {
         })
 
         return { events, periods }
+    }
+
+    updateContainers() {
+        this.eventsContainer.setData(this.filterEvents(this.events))
+        this.periodsContainer.setData(this.filterPeriods(this.periods))
     }
 
     handleFilterChange(event) {
@@ -119,11 +149,6 @@ export class Calendar extends HTMLElement {
         return result
     }
 
-    updateContainers() {
-        this.eventsContainer.setData(this.filterEvents(this.events))
-        this.periodsContainer.setData(this.filterPeriods(this.periods))
-    }
-
     generateStorageKey() {
         const sanitizedPath = location.pathname.replace(/[\/\s]+/g, "-").replace(/^-+|-+$/g, "")
         this.storageKey = `calendar-details-${sanitizedPath}`
@@ -162,9 +187,6 @@ export class Calendar extends HTMLElement {
     render() {
         if (!this.rawData) return
 
-        this.metadataFilter.setData(this.rawData)
-        this.updateContainers()
-
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; }
@@ -198,15 +220,20 @@ export class Calendar extends HTMLElement {
                 }
             </style>
             <details id="filters" open>
-                <summary>Filters</summary>
+                <summary>${this.config.labels.filters}</summary>
             </details>
             <details id="events" open>
-                <summary>Events</summary>
+                <summary>${this.config.labels.events}</summary>
             </details>
             <details id="periods" open>
-                <summary>Periods</summary>
+                <summary>${this.config.labels.periods}</summary>
             </details>
         `
+
+        this.eventsContainer = new CalendarEventsContainer(this.filterEvents(this.events), this.config)
+        this.periodsContainer = new CalendarPeriodsContainer(this.filterPeriods(this.periods), this.config)
+        this.metadataFilter = new MetadataFilter(this.rawData, this.config)
+        this.periodFilter = new PeriodFilter(this.config)
 
         this.shadowRoot.getElementById("events").appendChild(this.eventsContainer)
         this.shadowRoot.getElementById("periods").appendChild(this.periodsContainer)

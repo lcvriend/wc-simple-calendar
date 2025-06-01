@@ -2,10 +2,10 @@ import { CalendarPeriodGroup } from './calendar-period-group.js'
 import { CalendarPeriod } from './calendar-period.js'
 
 export class CalendarPeriodsContainer extends HTMLElement {
-    constructor(calendarArray = null, locale = null) {
+    constructor(calendarArray = null, config = {}) {
         super()
         this.attachShadow({ mode: "open" })
-        this.locale = locale ?? undefined
+        this.config = config
         if (calendarArray) {
             this.setData(calendarArray)
         }
@@ -97,7 +97,7 @@ export class CalendarPeriodsContainer extends HTMLElement {
         `
 
         this.processedData.forEach(([categoryName, periods]) => {
-            const periodGroup = new CalendarPeriodGroup(categoryName, periods, this.locale)
+            const periodGroup = new CalendarPeriodGroup(categoryName, periods, this.config.locale)
             this.shadowRoot.appendChild(periodGroup)
         })
     }

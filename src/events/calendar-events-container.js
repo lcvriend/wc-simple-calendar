@@ -2,10 +2,10 @@ import { CalendarEventGroup } from './calendar-event-group.js'
 import { CalendarEvent } from './calendar-event.js'
 
 export class CalendarEventsContainer extends HTMLElement {
-   constructor(calendarArray = null, locale = null, pastDays = 30) {
+   constructor(calendarArray = null, config = {}, pastDays = 30) {
        super()
        this.attachShadow({ mode: "open" })
-       this.locale = locale ?? undefined
+       this.config = config
        this.pastDays = pastDays
        if (calendarArray) {
            this.setData(calendarArray)
@@ -170,14 +170,14 @@ export class CalendarEventsContainer extends HTMLElement {
                     margin-bottom: 0.5rem;
                 }
             </style>
-            <button id="scroll-to-today">Today</button>
+            <button id="scroll-to-today">${this.config.labels.eventsToday}</button>
         `
 
         this.processedData.forEach(item => {
             switch (item.type) {
                 case 'month-header':
                     const monthElement = document.createElement('h2')
-                    monthElement.textContent = this.formatMonthHeader(item.month, this.locale)
+                    monthElement.textContent = this.formatMonthHeader(item.month, this.config.locale)
                     this.shadowRoot.appendChild(monthElement)
                     break
 
@@ -192,7 +192,7 @@ export class CalendarEventsContainer extends HTMLElement {
                         item.month,
                         item.day,
                         item.events,
-                        this.locale,
+                        this.config.locale,
                 )
                     this.shadowRoot.appendChild(dateGroupElelement)
                     break

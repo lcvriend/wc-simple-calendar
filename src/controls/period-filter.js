@@ -1,7 +1,8 @@
 export class PeriodFilter extends HTMLElement {
-    constructor() {
+    constructor(config) {
         super()
         this.attachShadow({ mode: "open" })
+        this.config = config
         this.selectedValue = "all"
         this.storageKey = null
     }
@@ -43,16 +44,16 @@ export class PeriodFilter extends HTMLElement {
                     gap: .25em;
                 }
             </style>
-            <div id="period-filter-name">periods</div>
+            <div id="period-filter-name">${this.config.labels.periods}</div>
             <div></div>
             <div id="radio-group">
                 <label>
                     <input type="radio" name="periods" value="all" ${this.selectedValue === "all" ? "checked" : ""}>
-                    All
+                    ${this.config.labels.periodsAll}
                 </label>
                 <label>
                     <input type="radio" name="periods" value="active" ${this.selectedValue === "active" ? "checked" : ""}>
-                    Active
+                    ${this.config.labels.periodsActive}
                 </label>
             </div>
         `

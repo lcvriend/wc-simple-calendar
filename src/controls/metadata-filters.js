@@ -3,9 +3,10 @@ import { CheckboxGroup } from './checkbox-group.js'
 
 
 export class MetadataFilter extends HTMLElement {
-    constructor(data = null) {
+    constructor(data = null, config = {}) {
         super()
         this.attachShadow({ mode: "open" })
+        this.config = config
         this.data = data
         this.selections = {} // { category: ['val1', 'val2'] }
         this.metadata = {}
@@ -72,7 +73,7 @@ export class MetadataFilter extends HTMLElement {
 
         // Create and append checkbox groups
         Object.entries(this.metadata).forEach(([category, values]) => {
-            const checkboxGroup = new CheckboxGroup({ [category]: values })
+            const checkboxGroup = new CheckboxGroup({ [category]: values }, this.config)
             this.shadowRoot.appendChild(checkboxGroup)
         })
     }

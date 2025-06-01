@@ -1,7 +1,8 @@
 export class CheckboxGroup extends HTMLElement {
-    constructor(data = null) {
+    constructor(data = null, config = {}) {
         super()
         this.attachShadow({ mode: "open" })
+        this.config = config
         this.selectedItems = new Set()
         this.data = {}
         this.groupLabel = ""
@@ -58,7 +59,7 @@ export class CheckboxGroup extends HTMLElement {
                 }
             </style>
             <div id="category-name">${this.groupLabel}</div>
-            <button type="button" class="select-all">All</button>
+            <button type="button" class="select-all">${this.config.labels.filtersAll}</button>
             <div id="checkboxes">
             ${this.data.map(val => `
                 <label>
