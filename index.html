@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Troll & Goblin Calendar</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee+Hairline&family=Lato&display=swap');
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            --background-color: hsl(30, 0%, 97%);
+            --hover-color: hsl(30, 0%, 92%);
+            --max-content-width: 720px;
+            --text-color: hsl(30, 0%, 8%);
+
+            --link-brightness: 200%;
+            --link-saturation: 800%;
+            --link-sepia: 100%;
+            --link-hue: 180deg;
+
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin-bottom: 4rem;
+            font-family: Calibri;
+            width: min(calc(100% - 2em), 600px);
+            margin-inline: auto;
+            min-height: 100vh;
+        }
+        body:has(darkmode-toggle[scheme="dark"]) {
+            --background-color: hsl(20, 38%, 18%);
+            --hover-color: hsl(21, 38%, 18%);
+            --text-color: hsl(30, 0%, 98%);
+            --link-brightness: 74%;
+            --link-saturation: 1200%;
+            background-color: var(--background-color);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid currentColor;
+            margin-bottom: 1rem;
+        }
+        header h1 {
+            font-variant: small-caps;
+            font-family: 'Bungee Hairline', cursive;
+            font-size: 2em;
+        }
+        header h1 a {
+            color: var(--text-color);
+            filter:
+                brightness(var(--link-brightness))
+                sepia(var(--link-sepia))
+                hue-rotate(var(--link-hue))
+                saturate(var(--link-saturation));
+            text-decoration: none;
+        }
+        .demo-info {
+            background: var(--hover-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+        .demo-info h2 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2em;
+        }
+        .demo-info p {
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+    </style>
+    <script type="module" src="https://lcvriend.github.io/wc-darkmode-toggle/src/darkmode-toggle.js"></script>
+</head>
+<body>
+    <header>
+        <h1>🧌 Troll & Goblin Calendar</h1>
+        <darkmode-toggle></darkmode-toggle>
+    </header>
+
+    <div class="demo-info">
+        <h2>Calendar Web Component Demo</h2>
+        <p>This demonstrates a year-calendar web component with filtering capabilities. The data includes both single-day events and multi-day periods.</p>
+        <p><strong>Try the filters:</strong> Use the checkboxes to filter by creature type, location, or activity type. Toggle between "All" and "Active" periods to see only current seasonal activities.</p>
+    </div>
+
+    <year-calendar id="cal" locale="en-US"></year-calendar>
+
+    <script type="module">
+        // Import the calendar component (adjust path as needed)
+        import { Calendar } from './src/calendar.js'
+
+        const trollGoblinData = [
+            // January
+            {"start_month": 1, "start_day": 1, "description": "New Year Howling Contest", "creature": "troll", "location": "mountain", "type": "celebration"},
+            {"start_month": 1, "start_day": 15, "description": "Ice Bridge Toll Collection", "creature": "troll", "location": "mountain", "type": "trade"},
+            {"start_month": 1, "start_day": 20, "end_month": 2, "end_day": 5, "description": "Winter Cave Hibernation", "creature": "goblin", "location": "cave", "type": "migration"},
+
+            // February
+            {"start_month": 2, "start_day": 14, "description": "Valentine's Day Mischief", "creature": "goblin", "location": "village", "type": "celebration"},
+            {"start_month": 2, "start_day": 28, "description": "Leap Year Lucky Charm Hunt", "creature": "both", "location": "forest", "type": "ritual"},
+            {"start_month": 2, "start_day": 10, "end_month": 2, "end_day": 25, "description": "Stone Sharpening Season", "creature": "troll", "location": "cave", "type": "ritual"},
+
+            // March
+            {"start_month": 3, "start_day": 1, "description": "Spring Awakening Ceremony", "creature": "both", "location": "forest", "type": "ritual"},
+            {"start_month": 3, "start_day": 15, "description": "Mushroom Festival", "creature": "goblin", "location": "forest", "type": "celebration"},
+            {"start_month": 3, "start_day": 20, "end_month": 4, "end_day": 15, "description": "Spring Migration to Lower Valleys", "creature": "goblin", "location": "forest", "type": "migration"},
+            {"start_month": 3, "start_day": 25, "description": "Territorial Boundary Marking", "creature": "troll", "location": "mountain", "type": "warfare"},
+
+            // April
+            {"start_month": 4, "start_day": 1, "description": "April Fools' Pranks on Humans", "creature": "goblin", "location": "village", "type": "celebration"},
+            {"start_month": 4, "start_day": 10, "description": "Bridge Repair Day", "creature": "troll", "location": "mountain", "type": "trade"},
+            {"start_month": 4, "start_day": 20, "end_month": 5, "end_day": 10, "description": "Swamp Clearing Operations", "creature": "both", "location": "swamp", "type": "warfare"},
+
+            // May
+            {"start_month": 5, "start_day": 1, "description": "May Day Flower Crown Contest", "creature": "goblin", "location": "forest", "type": "celebration"},
+            {"start_month": 5, "start_day": 15, "description": "Mother's Day Family Gatherings", "creature": "both", "location": "cave", "type": "celebration"},
+            {"start_month": 5, "start_day": 20, "end_month": 6, "end_day": 5, "description": "Annual Treasure Hunt", "creature": "goblin", "location": "mountain", "type": "trade"},
+
+            // June
+            {"start_month": 6, "start_day": 1, "description": "Summer Solstice Preparation", "creature": "both", "location": "forest", "type": "ritual"},
+            {"start_month": 6, "start_day": 15, "description": "Midsummer Bonfire Night", "creature": "troll", "location": "mountain", "type": "celebration"},
+            {"start_month": 6, "start_day": 20, "end_month": 8, "end_day": 31, "description": "Summer Raiding Season", "creature": "troll", "location": "village", "type": "warfare"},
+
+            // July
+            {"start_month": 7, "start_day": 4, "description": "Independence from Human Rules Day", "creature": "both", "location": "forest", "type": "celebration"},
+            {"start_month": 7, "start_day": 15, "description": "Mid-Summer Trading Fair", "creature": "goblin", "location": "swamp", "type": "trade"},
+            {"start_month": 7, "start_day": 25, "end_month": 8, "end_day": 5, "description": "Cave Cooling Retreat", "creature": "goblin", "location": "cave", "type": "migration"},
+
+            // August
+            {"start_month": 8, "start_day": 1, "description": "Harvest Moon Planning", "creature": "troll", "location": "mountain", "type": "ritual"},
+            {"start_month": 8, "start_day": 15, "description": "Late Summer Mushroom Picking", "creature": "goblin", "location": "forest", "type": "trade"},
+            {"start_month": 8, "start_day": 20, "end_month": 9, "end_day": 15, "description": "Territorial Disputes Peak Season", "creature": "both", "location": "mountain", "type": "warfare"},
+
+            // September
+            {"start_month": 9, "start_day": 1, "description": "Back to Cave School", "creature": "goblin", "location": "cave", "type": "celebration"},
+            {"start_month": 9, "start_day": 15, "description": "Autumn Equinox Ritual", "creature": "both", "location": "forest", "type": "ritual"},
+            {"start_month": 9, "start_day": 22, "end_month": 10, "end_day": 31, "description": "Harvest Season Raids", "creature": "troll", "location": "village", "type": "warfare"},
+
+            // October
+            {"start_month": 10, "start_day": 1, "description": "Halloween Preparation Meeting", "creature": "both", "location": "cave", "type": "ritual"},
+            {"start_month": 10, "start_day": 15, "description": "Pumpkin Smashing Contest", "creature": "goblin", "location": "village", "type": "celebration"},
+            {"start_month": 10, "start_day": 31, "description": "Halloween Night Terror Campaign", "creature": "both", "location": "village", "type": "celebration"},
+            {"start_month": 10, "start_day": 10, "end_month": 11, "end_day": 20, "description": "Winter Preparation Gathering", "creature": "both", "location": "cave", "type": "migration"},
+
+            // November
+            {"start_month": 11, "start_day": 1, "description": "All Saints' Day Mischief", "creature": "goblin", "location": "village", "type": "celebration"},
+            {"start_month": 11, "start_day": 15, "description": "Pre-Winter Strength Testing", "creature": "troll", "location": "mountain", "type": "ritual"},
+            {"start_month": 11, "start_day": 25, "description": "Thanksgiving Leftover Raids", "creature": "both", "location": "village", "type": "warfare"},
+            {"start_month": 11, "start_day": 20, "end_month": 12, "end_day": 15, "description": "Final Trading Before Winter", "creature": "goblin", "location": "swamp", "type": "trade"},
+
+            // December
+            {"start_month": 12, "start_day": 1, "description": "Winter Solstice Planning", "creature": "both", "location": "cave", "type": "ritual"},
+            {"start_month": 12, "start_day": 15, "description": "Christmas Present Stealing Prep", "creature": "goblin", "location": "village", "type": "warfare"},
+            {"start_month": 12, "start_day": 25, "description": "Christmas Day Village Raids", "creature": "troll", "location": "village", "type": "warfare"},
+            {"start_month": 12, "start_day": 31, "description": "Year-End Grudge Settlement", "creature": "both", "location": "mountain", "type": "warfare"},
+            {"start_month": 12, "start_day": 20, "end_month": 1, "end_day": 10, "description": "Winter Deep Cave Hibernation", "creature": "goblin", "location": "cave", "type": "migration"}
+        ]
+
+        const calendar = document.getElementById('cal')
+        calendar.setConfig({
+            labels: {
+                filters: "Filters",
+                filtersAll: "All",
+                periods: "Periods",
+                periodsAll: "All",
+                periodsActive: "Active",
+                events: "Events",
+                eventsToday: "Today"
+            }
+        })
+        calendar.setData(trollGoblinData)
+    </script>
+</body>
+</html>
