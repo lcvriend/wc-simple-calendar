@@ -3,7 +3,7 @@ export class PeriodFilter extends HTMLElement {
         super()
         this.attachShadow({ mode: "open" })
         this.config = config
-        this.selectedValue = "all"
+        this.selectedValue = "active"
         this.storageKey = null
     }
 
