@@ -1,5 +1,5 @@
 import { CalendarPeriodGroup } from './calendar-period-group.js'
-import { CalendarPeriod } from './calendar-period.js'
+import { CalendarItem } from '../calendar-item.js'
 
 export class CalendarPeriodsContainer extends HTMLElement {
     constructor(calendarArray = null, config = {}) {
@@ -51,7 +51,7 @@ export class CalendarPeriodsContainer extends HTMLElement {
 
         const firstItem = this.data[0]
         const metadataKeys = Object.keys(firstItem)
-            .filter(key => !CalendarPeriod.EXCLUDED_KEYS.has(key))
+            .filter(key => !CalendarItem.EXCLUDED_KEYS.has(key))
 
         return metadataKeys[0] ?? null
     }
@@ -62,7 +62,7 @@ export class CalendarPeriodsContainer extends HTMLElement {
         const allKeys = new Set()
         this.data.forEach(item => {
             Object.keys(item)
-                .filter(key => !CalendarPeriod.EXCLUDED_KEYS.has(key))
+                .filter(key => !CalendarItem.EXCLUDED_KEYS.has(key))
                 .forEach(key => allKeys.add(key))
         })
 

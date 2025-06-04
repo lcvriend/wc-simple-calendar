@@ -1,5 +1,5 @@
 import { CalendarEventGroup } from './calendar-event-group.js'
-import { CalendarEvent } from './calendar-event.js'
+import { CalendarItem } from '../calendar-item.js'
 
 export class CalendarEventsContainer extends HTMLElement {
    constructor(calendarArray = null, config = {}, pastDays = 30) {
@@ -113,7 +113,7 @@ export class CalendarEventsContainer extends HTMLElement {
 
     getMetadataCategories(event) {
         return Object.entries(event)
-            .filter(([key, value]) => !CalendarEvent.EXCLUDED_KEYS.has(key) && value != null)
+            .filter(([key, value]) => !CalendarItem.EXCLUDED_KEYS.has(key) && value != null)
             .map(([key, value]) => value)
     }
 

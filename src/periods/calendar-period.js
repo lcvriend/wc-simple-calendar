@@ -1,12 +1,6 @@
-export class CalendarPeriod extends HTMLElement {
-    static EXCLUDED_KEYS = new Set([
-        "start_month",
-        "start_day",
-        "end_month",
-        "end_day",
-        "description",
-    ])
+import { CalendarItem } from '../calendar-item.js'
 
+export class CalendarPeriod extends HTMLElement {
     constructor(data = null, locale = null) {
         super()
         this.attachShadow({ mode: "open" })
@@ -17,13 +11,6 @@ export class CalendarPeriod extends HTMLElement {
     setData(periodData) {
         this.data = periodData
         this.render()
-    }
-
-    getMetadataProperties() {
-        if (!this.data) return []
-
-        return Object.entries(this.data)
-            .filter(([key, value]) => !CalendarPeriod.EXCLUDED_KEYS.has(key) && value != null)
     }
 
     formatDateRange(startMonth, startDay, endMonth, endDay, locale) {
@@ -39,7 +26,6 @@ export class CalendarPeriod extends HTMLElement {
     render() {
         if (!this.data) return
 
-        const description = this.data.description ?? ""
         const dateRange = this.formatDateRange(
             this.data.start_month,
             this.data.start_day,
@@ -47,30 +33,17 @@ export class CalendarPeriod extends HTMLElement {
             this.data.end_day,
             this.locale
         )
-        const metadata = this.renderMetadataHtml()
 
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; }
-                :host([hidden]) { display: none; }
-                #date-range { font-weight: bold; }
-                #description { }
-                #metadata { }
-                .metadata-item { font-family: monospace; }
-                .metadata-item:not(:last-child)::after {
-                    content: " • ";
-                }
+                #date-range { font-weight: bold; margin-bottom: 0.25em; }
             </style>
             <div id="date-range">${dateRange}</div>
-            <div id="description">${description}</div>
-            <div id="metadata">${metadata}</div>
         `
-    }
 
-    renderMetadataHtml() {
-        return this.getMetadataProperties()
-            .map(([, value]) => `<span class="metadata-item">${value}</span>`)
-            .join("")
+        const item = new CalendarItem(this.data)
+        this.shadowRoot.appendChild(item)
     }
 }
 

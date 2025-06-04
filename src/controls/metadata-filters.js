@@ -1,4 +1,4 @@
-import { CalendarEvent } from '../events/calendar-event.js'
+import { CalendarItem } from '../calendar-item.js'
 import { CheckboxGroup } from './checkbox-group.js'
 
 
@@ -24,7 +24,7 @@ export class MetadataFilter extends HTMLElement {
         const metadata = {}
         data.forEach(item => {
             Object.entries(item).forEach(([key, value]) => {
-                if (!CalendarEvent.EXCLUDED_KEYS.has(key) && value != null) {
+                if (!CalendarItem.EXCLUDED_KEYS.has(key) && value != null) {
                     if (!metadata[key]) metadata[key] = new Set()
                     metadata[key].add(value)
                 }
